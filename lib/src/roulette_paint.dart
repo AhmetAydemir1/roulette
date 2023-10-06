@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:roulette/roulette.dart';
 import 'package:roulette/utils/transform_entry.dart';
 import 'package:roulette/utils/text.dart';
-
+import 'rotated_text.dart';
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -204,7 +204,7 @@ class _RoulettePainter extends CustomPainter {
       // If there is an icon, it is converted into a string text.
       // Otherwise, the given text is rerieved.
       final String? text =
-          icon == null ? unit.text : String.fromCharCode(icon.codePoint);
+      icon == null ? unit.text : String.fromCharCode(icon.codePoint);
 
       // No string text to draw.
       if (text == null) {
@@ -222,21 +222,26 @@ class _RoulettePainter extends CustomPainter {
       // Calculates chord of circle.
       final chord = 2 * (radius * style.textLayoutBias) * sin(sweep / 2);
 
-      // Creates a builder for the paragraph that will be drawn on the canvas.
-      final pb = ui.ParagraphBuilder(ui.ParagraphStyle(
-        textAlign: TextAlign.center,
-      ))
-        ..pushStyle(textStyle.asUiTextStyle())
-        ..addText(text);
-
       // Creates the paragraph.
-      final paragraph = pb.build();
-      paragraph.layout(ui.ParagraphConstraints(width: chord));
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: text,
+          style: textStyle,
+        ),
+        maxLines: 2,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+
+      textPainter.layout(maxWidth: radius);
 
       // Draws the paragraph.
-      canvas.drawParagraph(
-        paragraph,
-        Offset(-chord / 2, -radius * style.textLayoutBias),
+      canvas.drawRotatedText(
+        pivot: Offset(0, -radius * style.textLayoutBias),
+        textPainter: textPainter,
+        isInDegrees: true,
+        angle: -90,
+        alignment: Alignment.center,
       );
 
       canvas.restore();
